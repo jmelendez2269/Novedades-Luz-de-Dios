@@ -1,0 +1,432 @@
+---
+import { Picture, getImage } from 'astro:assets';
+import Icon from './Icon.astro';
+import { getPhoto, type PhotoKey, type PhotoTag } from '../data/photos';
+import { ui, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  photos: PhotoKey[];
+  /** Show the filter chips (Gallery page). */
+  filters?: boolean;
+}
+
+const { lang, photos, filters = false } = Astro.props;
+const t = ui[lang];
+
+const filterLabels: Record<'all' | PhotoTag, { en: string; es: string }> = {
+  all: { en: 'Everything', es: 'Todo' },
+  storefront: { en: 'Storefront', es: 'Fachada' },
+  interior: { en: 'Inside the shop', es: 'Adentro' },
+  candles: { en: 'Candles', es: 'Velas' },
+  shelves: { en: 'On the shelves', es: 'En los estantes' },
+  saints: { en: 'Saints & statues', es: 'Santos y estatuas' },
+};
+const filterOrder = ['all', 'storefront', 'interior', 'candles', 'shelves', 'saints'] as const;
+
+const items = await Promise.all(
+  photos.map(async (key) => {
+    const p = getPhoto(key);
+    const large = await getImage({
+      src: p.src,
+      width: Math.min(1800, p.src.width),
+      format: 'webp',
+      quality: 78,
+    });
+    return { p, large };
+  }),
+);
+---
+
+<div class="gallery" data-gallery>
+  {
+    filters && (
+      <div class="filters" role="group" aria-label={lang === 'es' ? 'Filtrar fotos' : 'Filter photos'}>
+        {filterOrder.map((f) => (
+          <button type="button" class="chip" data-filter={f} aria-pressed={f === 'all' ? 'true' : 'false'}>
+            {filterLabels[f][lang]}
+          </button>
+        ))}
+      </div>
+    )
+  }
+
+  <ul class="masonry" role="list">
+    {
+      items.map(({ p, large }, i) => (
+        <li class="tile" data-tags={p.tags.join(' ')} data-reveal style={`--reveal-delay:${(i % 4) * 0.06}s`}>
+          <button
+            type="button"
+            class="tile__btn"
+            data-index={i}
+            data-full={large.src}
+            data-alt={p.alt[lang]}
+            aria-label={`${p.alt[lang]} — ${lang === 'es' ? 'ampliar' : 'enlarge'}`}
+          >
+            <Picture
+              src={p.src}
+              alt=""
+              widths={[320, 480, 720].filter((w) => w <= p.src.width)}
+              sizes="(min-width: 72rem) 24vw, (min-width: 48rem) 32vw, 48vw"
+              formats={['avif', 'webp']}
+              fallbackFormat="jpg"
+              quality={70}
+              loading="lazy"
+              decoding="async"
+            />
+          </button>
+        </li>
+      ))
+    }
+  </ul>
+
+  <dialog class="lightbox" aria-label={t.lightbox.label} data-lightbox>
+    <div class="lightbox__inner">
+      <figure class="lightbox__figure">
+        <img data-lightbox-img alt="" />
+        <figcaption>
+          <span data-lightbox-caption></span>
+          <span class="lightbox__count" aria-live="polite" data-lightbox-count></span>
+        </figcaption>
+      </figure>
+      <button type="button" class="lb-btn lb-close" data-lightbox-close aria-label={t.lightbox.close}>
+        <Icon name="close" />
+      </button>
+      <button type="button" class="lb-btn lb-prev" data-lightbox-prev aria-label={t.lightbox.prev}>
+        <Icon name="chevron-left" />
+      </button>
+      <button type="button" class="lb-btn lb-next" data-lightbox-next aria-label={t.lightbox.next}>
+        <Icon name="chevron-right" />
+      </button>
+    </div>
+  </dialog>
+  <template data-of>{t.lightbox.of}</template>
+</div>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-gallery]')) {
+    const tiles = [...root.querySelectorAll<HTMLLIElement>('.tile')];
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('.tile__btn')];
+    const dialog = root.querySelector<HTMLDialogElement>('[data-lightbox]')!;
+    const img = root.querySelector<HTMLImageElement>('[data-lightbox-img]')!;
+    const caption = root.querySelector<HTMLElement>('[data-lightbox-caption]')!;
+    const count = root.querySelector<HTMLElement>('[data-lightbox-count]')!;
+    const ofWord = root.querySelector('template[data-of]')?.innerHTML ?? 'of';
+    let opener: HTMLElement | null = null;
+    let current = 0;
+
+    // Only photos visible under the active filter take part in navigation.
+    const visible = () => buttons.filter((b) => !b.closest<HTMLElement>('.tile')!.hidden);
+
+    const show = (btn: HTMLButtonElement) => {
+      const list = visible();
+      current = list.indexOf(btn);
+      img.classList.remove('is-loaded');
+      img.src = btn.dataset.full ?? '';
+      img.alt = btn.dataset.alt ?? '';
+      caption.textContent = btn.dataset.alt ?? '';
+      count.textContent = `${current + 1} ${ofWord} ${list.length}`;
+    };
+
+    const step = (dir: number) => {
+      const list = visible();
+      if (!list.length) return;
+      show(list[(current + dir + list.length) % list.length]);
+    };
+
+    img.addEventListener('load', () => img.classList.add('is-loaded'));
+
+    buttons.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        opener = btn;
+        show(btn);
+        dialog.showModal();
+        document.body.classList.add('lightbox-open');
+      }),
+    );
+
+    dialog.addEventListener('close', () => {
+      document.body.classList.remove('lightbox-open');
+      opener?.focus();
+    });
+
+    root.querySelector('[data-lightbox-close]')?.addEventListener('click', () => dialog.close());
+    root.querySelector('[data-lightbox-prev]')?.addEventListener('click', () => step(-1));
+    root.querySelector('[data-lightbox-next]')?.addEventListener('click', () => step(1));
+
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') step(-1);
+      if (e.key === 'ArrowRight') step(1);
+    });
+
+    // Close when the backdrop (outside the photo and controls) is clicked.
+    dialog.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target === dialog || target.classList.contains('lightbox__inner')) dialog.close();
+    });
+
+    // Swipe on touch screens.
+    let startX = 0;
+    dialog.addEventListener('touchstart', (e) => (startX = e.touches[0].clientX), { passive: true });
+    dialog.addEventListener(
+      'touchend',
+      (e) => {
+        const dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
+      },
+      { passive: true },
+    );
+
+    // Filters.
+    const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    chips.forEach((chip) =>
+      chip.addEventListener('click', () => {
+        const f = chip.dataset.filter!;
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+        tiles.forEach((tile) => {
+          tile.hidden = f !== 'all' && !(tile.dataset.tags ?? '').split(' ').includes(f);
+          if (!tile.hidden) tile.classList.add('is-visible');
+        });
+      }),
+    );
+  }
+</script>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .chip {
+    min-height: 2.75rem;
+    padding: 0.5rem 1.1rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: transparent;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .chip:hover {
+    background: var(--cream-deep);
+  }
+
+  .chip[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--white);
+  }
+
+  .masonry {
+    columns: 2;
+    column-gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 48rem) {
+    .masonry {
+      columns: 3;
+      column-gap: 1rem;
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .masonry {
+      columns: 4;
+    }
+  }
+
+  .tile {
+    break-inside: avoid;
+    margin-bottom: 0.75rem;
+  }
+
+  @media (min-width: 48rem) {
+    .tile {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .tile[hidden] {
+    display: none;
+  }
+
+  .tile__btn {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--cream-deep);
+    cursor: zoom-in;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+
+  .tile__btn :global(img) {
+    width: 100%;
+    height: auto;
+    transition: transform 0.9s var(--ease-out), filter 0.6s;
+  }
+
+  .tile__btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 55%, rgb(212 160 23 / 0.28));
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .tile__btn:hover :global(img),
+  .tile__btn:focus-visible :global(img) {
+    transform: scale(1.04);
+  }
+
+  .tile__btn:hover::after,
+  .tile__btn:focus-visible::after {
+    opacity: 1;
+  }
+
+  /* Lightbox */
+  .lightbox {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgb(20 14 11 / 0.94);
+    color: var(--white);
+  }
+
+  .lightbox::backdrop {
+    background: rgb(20 14 11 / 0.6);
+  }
+
+  .lightbox[open] {
+    animation: lb-in 0.35s var(--ease-out);
+  }
+
+  @keyframes lb-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .lightbox__inner {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 4.5rem 1rem 1.5rem;
+  }
+
+  @media (min-width: 48rem) {
+    .lightbox__inner {
+      padding: 4rem 5.5rem 2rem;
+    }
+  }
+
+  .lightbox__figure {
+    display: grid;
+    gap: 0.9rem;
+    justify-items: center;
+    margin: 0;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .lightbox__figure img {
+    max-width: 100%;
+    max-height: calc(100dvh - 10rem);
+    width: auto;
+    height: auto;
+    border-radius: var(--radius);
+    box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.8);
+    opacity: 0;
+    transition: opacity 0.35s var(--ease-out);
+  }
+
+  .lightbox__figure img.is-loaded {
+    opacity: 1;
+  }
+
+  figcaption {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    width: min(100%, 48rem);
+    font-size: var(--step--1);
+    color: rgb(255 253 249 / 0.85);
+  }
+
+  .lightbox__count {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.75;
+  }
+
+  .lb-btn {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1.5px solid rgb(255 255 255 / 0.4);
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.35);
+    color: var(--white);
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+
+  .lb-btn:hover {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+
+  .lb-close {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .lb-prev,
+  .lb-next {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .lb-prev {
+    left: 1rem;
+  }
+
+  .lb-next {
+    right: 1rem;
+  }
+
+  @media (max-width: 47.99rem) {
+    .lb-prev,
+    .lb-next {
+      top: auto;
+      bottom: 1rem;
+      transform: none;
+    }
+    .lightbox__inner {
+      padding-bottom: 5rem;
+    }
+  }
+
+  :global(body.lightbox-open) {
+    overflow: hidden;
+  }
+</style>

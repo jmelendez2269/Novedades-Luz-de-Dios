@@ -1,0 +1,704 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Photo from '../../components/Photo.astro';
+import Icon from '../../components/Icon.astro';
+import ReviewQuote from '../../components/ReviewQuote.astro';
+import HoursList from '../../components/HoursList.astro';
+import { business } from '../../data/business';
+import type { PhotoKey } from '../../data/photos';
+import { langFromParam, langPaths, pathFor, ui } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return langPaths();
+}
+
+const lang = langFromParam(Astro.params.lang);
+const t = ui[lang];
+
+const copy = {
+  en: {
+    title: 'Home',
+    description:
+      'A neighborhood botanica at 806 W Webb Ave in Burlington, NC: candles, herbs, spiritual goods, card readings, money transfers, and bus tickets. Call (336) 314-1821.',
+    heroLine:
+      'A neighborhood botanica for candles, herbs, spiritual goods, and card readings — and a place people come when they have questions.',
+    signIntro: 'From the sign out front',
+    welcomeEyebrow: 'Welcome',
+    welcomeTitle: 'Easy to miss from the road. Hard to forget once you step inside.',
+    welcome: [
+      'At 806 West Webb Avenue, Botanica & Novedades Luz de Dios is easy to miss if you only drive by, and hard to forget once you step inside. Shelves are lined with candles and oils, saints watch from the walls, and the room has the kind of quiet that reviewers keep calling a positive, peaceful vibe.',
+      'People come for spiritual merchandise, for a card reading, and for everyday help — including money transfers and bus tickets, which the shop lists right on the window. If you arrive with questions, reviewers say you leave with answers. If something you need is not on the shelf, the owners have a reputation for helping you find it.',
+    ],
+    aboutLink: 'More about the shop',
+    findEyebrow: 'On the shelves',
+    findTitle: 'Candles, herbs, saints, and more',
+    findLede: 'Prepared glass candles, jars of herbs, spiritual liquids and oils, saints, statues, rosaries, crosses, and religious art.',
+    findLink: 'See products & services',
+    galleryEyebrow: 'Inside Luz de Dios',
+    galleryTitle: 'Every wall has something on it',
+    galleryLink: 'Open the gallery',
+    reviewsEyebrow: 'In their words',
+    visitEyebrow: 'Visit',
+    visitTitle: 'Look for the blue shop with the red tile roof',
+    visitText: 'House number 806 is painted on the wall. There is a wheelchair-accessible parking lot.',
+  },
+  es: {
+    title: 'Inicio',
+    description:
+      'Una botánica de barrio en el 806 de W Webb Ave en Burlington, NC: velas, hierbas, artículos espirituales, lectura de cartas, envíos de dinero y boletos de autobús. Llame al (336) 314-1821.',
+    heroLine:
+      'Una botánica de barrio con velas, hierbas, artículos espirituales y lectura de cartas — y un lugar al que la gente llega cuando tiene preguntas.',
+    signIntro: 'Del letrero de la tienda',
+    welcomeEyebrow: 'Bienvenidos',
+    welcomeTitle: 'Fácil de pasar por alto desde la calle. Difícil de olvidar una vez que entras.',
+    welcome: [
+      'En el 806 de West Webb Avenue, Botanica & Novedades Luz de Dios es fácil de pasar por alto si solo vas de paso en carro, y difícil de olvidar una vez que entras. Los estantes están llenos de velas y aceites, los santos te miran desde las paredes, y el lugar tiene esa calma que las reseñas describen una y otra vez como un ambiente positivo y tranquilo.',
+      'La gente viene por artículos espirituales, por una lectura de cartas y por ayuda de todos los días — incluidos envíos de dinero y boletos de autobús, que la tienda anuncia en su propia ventana. Según las reseñas, si llegas con preguntas, sales con respuestas. Y si lo que necesitas no está en el estante, los dueños tienen fama de ayudarte a encontrarlo.',
+    ],
+    aboutLink: 'Conoce más de la tienda',
+    findEyebrow: 'En los estantes',
+    findTitle: 'Velas, hierbas, santos y más',
+    findLede: 'Veladoras preparadas, frascos de hierbas, líquidos y aceites espirituales, santos, estatuas, rosarios, cruces y arte religioso.',
+    findLink: 'Ver productos y servicios',
+    galleryEyebrow: 'Adentro de Luz de Dios',
+    galleryTitle: 'Cada pared tiene algo que ver',
+    galleryLink: 'Abrir la galería',
+    reviewsEyebrow: 'En sus palabras',
+    visitEyebrow: 'Visítanos',
+    visitTitle: 'Busca la tienda azul con techo de teja roja',
+    visitText: 'El número 806 está pintado en la pared. Hay estacionamiento con acceso para sillas de ruedas.',
+  },
+}[lang];
+
+// The four lines on the shop's services poster, in its own Spanish.
+const signLines = [
+  { es: 'Lectura de cartas', en: 'Card readings' },
+  { es: 'Productos esotéricos', en: 'Esoteric & spiritual goods' },
+  { es: 'Envíos de dinero', en: 'Money transfers' },
+  { es: 'Boletos de autobús y más', en: 'Bus tickets and more' },
+];
+
+const shelves: { photo: PhotoKey; en: string; es: string }[] = [
+  { photo: 'products-candles-prepared-01', en: 'Prepared candles', es: 'Veladoras preparadas' },
+  { photo: 'products-herb-jars-06', en: 'Herbs', es: 'Hierbas' },
+  { photo: 'products-sprays-guadalupe-shelf-25', en: 'Oils, sprays & liquids', es: 'Aceites, aerosoles y líquidos' },
+  { photo: 'products-saint-statues-08', en: 'Saints & statues', es: 'Santos y estatuas' },
+];
+
+const peek: PhotoKey[] = [
+  'interior-aisle-wide-12',
+  'gallery-guadalupe-wall-01',
+  'interior-turquoise-rosaries-10',
+  'products-rainbow-candles-16',
+  'interior-checkout-jewelry-09',
+  'products-orisha-statues-14',
+  'interior-mural-04',
+  'products-amulets-hanging-22',
+];
+---
+
+<BaseLayout lang={lang} page="home" title={copy.title} description={copy.description}>
+  <!-- Hero: the current storefront -->
+  <section class="hero">
+    <div class="hero__media">
+      <Photo
+        photo="storefront-current-daylight-02"
+        lang={lang}
+        sizes="100vw"
+        widths={[640, 960, 1280, 1600, 2000]}
+        loading="eager"
+        fetchpriority="high"
+      />
+    </div>
+    <div class="hero__shade" aria-hidden="true"></div>
+    <div class="wrap hero__content">
+      <h1 class="hero__title">
+        <span class="visually-hidden">Botanica & Novedades Luz de Dios</span>
+        <span aria-hidden="true" class="hero__kicker sign sign--outline" lang="es">Botanica y Novedades</span>
+        <span aria-hidden="true" class="hero__name">Luz de Dios</span>
+      </h1>
+      <p class="hero__place">{t.location}</p>
+      <p class="hero__line">{copy.heroLine}</p>
+      <div class="btn-row">
+        <a class="btn btn--candle" href={business.phoneHref}>
+          <Icon name="phone" />
+          {t.callFull}
+        </a>
+        <a class="btn btn--ghost hero__ghost" href={pathFor('visit', lang)}>
+          <Icon name="pin" />
+          {business.address.street}
+        </a>
+      </div>
+      <p class="hero__rating">
+        <Icon name="star" />
+        {t.reviewsSummary}
+      </p>
+    </div>
+  </section>
+
+  <!-- The services poster, reset as a band of lettering -->
+  <section class="poster room--facade" aria-labelledby="poster-title">
+    <div class="wrap">
+      <h2 id="poster-title" class="poster__intro eyebrow">{copy.signIntro}</h2>
+      <ul class="poster__list" role="list">
+        {
+          signLines.map((line, i) => (
+            <li data-reveal style={`--reveal-delay:${i * 0.08}s`}>
+              <span class:list={['sign', i % 2 === 0 ? 'sign--outline' : 'sign--red poster__red']} lang="es">
+                {line.es}
+              </span>
+              {lang === 'en' && <span class="poster__en">{line.en}</span>}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Welcome -->
+  <section class="section room--plaster welcome">
+    <div class="wrap welcome__grid">
+      <div class="welcome__text" data-reveal>
+        <p class="eyebrow">{copy.welcomeEyebrow}</p>
+        <h2 class="h2">{copy.welcomeTitle}</h2>
+        <div class="welcome__body">
+          {copy.welcome.map((p) => <p>{p}</p>)}
+        </div>
+        <a class="link-arrow" href={pathFor('about', lang)}>{copy.aboutLink} <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="welcome__collage">
+        <div class="frame c1" data-reveal>
+          <Photo photo="interior-aisle-magenta-01" lang={lang} sizes="(min-width: 64rem) 22vw, 50vw" />
+        </div>
+        <div class="frame c2" data-reveal style="--reveal-delay:.12s">
+          <Photo photo="interior-entry-turquoise-02" lang={lang} sizes="(min-width: 64rem) 20vw, 45vw" />
+        </div>
+        <div class="frame c3" data-reveal style="--reveal-delay:.24s">
+          <Photo photo="products-candle-closeup-02" lang={lang} sizes="(min-width: 64rem) 16vw, 40vw" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A voice from the reviews -->
+  <section class="section room--berry feature-quote tiles-top">
+    <div class="wrap feature-quote__grid">
+      <div class="frame feature-quote__photo" data-reveal>
+        <Photo photo="gallery-guadalupe-wall-01" lang={lang} sizes="(min-width: 64rem) 36vw, 100vw" />
+      </div>
+      <ReviewQuote id="yessica" lang={lang} size="lg" />
+    </div>
+  </section>
+
+  <!-- What's on the shelves -->
+  <section class="section room--cream shelves">
+    <div class="wrap">
+      <div class="shelves__head" data-reveal>
+        <div>
+          <p class="eyebrow">{copy.findEyebrow}</p>
+          <h2 class="h2">{copy.findTitle}</h2>
+        </div>
+        <p class="lede measure">{copy.findLede}</p>
+      </div>
+      <ul class="shelves__grid" role="list">
+        {
+          shelves.map((s, i) => (
+            <li data-reveal style={`--reveal-delay:${i * 0.08}s`}>
+              <a class="shelf-card" href={pathFor('products', lang)}>
+                <div class="frame">
+                  <Photo photo={s.photo} lang={lang} sizes="(min-width: 64rem) 24vw, (min-width: 40rem) 46vw, 92vw" decorative />
+                </div>
+                <span class="shelf-card__label">
+                  {s[lang]}
+                  <span aria-hidden="true">→</span>
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="shelves__more">
+        <a class="link-arrow" href={pathFor('products', lang)}>{copy.findLink} <span aria-hidden="true">→</span></a>
+      </p>
+    </div>
+  </section>
+
+  <!-- Gallery peek -->
+  <section class="section room--teal peek">
+    <div class="wrap peek__head" data-reveal>
+      <div>
+        <p class="eyebrow">{copy.galleryEyebrow}</p>
+        <h2 class="h2">{copy.galleryTitle}</h2>
+      </div>
+      <a class="btn btn--ghost" href={pathFor('gallery', lang)}>
+        {copy.galleryLink}
+        <Icon name="arrow" />
+      </a>
+    </div>
+    <ul class="peek__track" role="list" tabindex="0" aria-label={copy.galleryEyebrow}>
+      {
+        peek.map((key) => (
+          <li class="frame">
+            <Photo photo={key} lang={lang} sizes="(min-width: 64rem) 22rem, 70vw" widths={[360, 560, 800]} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- More reviews -->
+  <section class="section room--plaster reviews">
+    <div class="wrap">
+      <p class="eyebrow" data-reveal>{copy.reviewsEyebrow}</p>
+      <div class="reviews__grid">
+        <ReviewQuote id="michael" lang={lang} />
+        <ReviewQuote id="dakarai" lang={lang} />
+        <ReviewQuote id="jared" lang={lang} size="sm" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Visit -->
+  <section class="visit-band room--facade tiles-top">
+    <div class="wrap visit-band__grid">
+      <div data-reveal>
+        <p class="eyebrow">{copy.visitEyebrow}</p>
+        <h2 class="h2">{copy.visitTitle}</h2>
+        <p class="lede visit-band__text">{copy.visitText}</p>
+        <address class="visit-band__addr">
+          {`${business.address.street}, ${business.address.city}, ${business.address.region} ${business.address.postalCode}`}
+        </address>
+        <div class="btn-row">
+          <a class="btn btn--candle" href={business.phoneHref}><Icon name="phone" />{t.callFull}</a>
+          <a class="btn btn--ghost" href={business.mapsUrl} target="_blank" rel="noopener">
+            <Icon name="pin" />{t.directions}
+          </a>
+        </div>
+      </div>
+      <div class="visit-band__hours" data-reveal style="--reveal-delay:.1s">
+        <h3 class="visit-band__h"><Icon name="clock" />{t.hoursTitle}</h3>
+        <HoursList lang={lang} variant="compact" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    display: grid;
+    min-height: min(92svh, 56rem);
+    color: var(--white);
+    background: var(--facade-deep);
+    overflow: hidden;
+  }
+
+  .hero__media,
+  .hero__shade {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 58% 60%;
+    animation: hero-settle 2.4s var(--ease-out) both;
+  }
+
+  @keyframes hero-settle {
+    from {
+      transform: scale(1.06);
+    }
+  }
+
+  .hero__shade {
+    background:
+      linear-gradient(90deg, rgb(18 48 79 / 0.92) 0%, rgb(18 48 79 / 0.72) 38%, rgb(18 48 79 / 0.1) 72%),
+      linear-gradient(0deg, rgb(18 48 79 / 0.85) 0%, transparent 45%);
+  }
+
+  @media (max-width: 47.99rem) {
+    .hero__shade {
+      background: linear-gradient(0deg, rgb(18 48 79 / 0.96) 0%, rgb(18 48 79 / 0.82) 55%, rgb(18 48 79 / 0.25) 100%);
+    }
+  }
+
+  .hero__content {
+    position: relative;
+    align-self: end;
+    padding-block: 7rem clamp(3rem, 2rem + 4vw, 5.5rem);
+  }
+
+  .hero__content > * {
+    max-width: 40rem;
+    animation: rise 1.1s var(--ease-out) both;
+  }
+
+  .hero__content > :nth-child(2) {
+    animation-delay: 0.12s;
+  }
+  .hero__content > :nth-child(3) {
+    animation-delay: 0.22s;
+  }
+  .hero__content > :nth-child(4) {
+    animation-delay: 0.32s;
+  }
+  .hero__content > :nth-child(5) {
+    animation-delay: 0.42s;
+  }
+
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+  }
+
+  .hero__kicker {
+    display: block;
+    margin-bottom: 0.15em;
+    font-size: var(--step-2);
+    font-style: italic;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    -webkit-text-stroke-color: var(--poster-red);
+    text-shadow: 0 0.05em 0 var(--poster-red);
+  }
+
+  .hero__title {
+    margin-top: 0.1em;
+    font-size: var(--step-5);
+    font-style: italic;
+    font-weight: 520;
+    line-height: 0.92;
+    letter-spacing: -0.025em;
+    font-variation-settings: 'SOFT' 100;
+    text-shadow: 0 0 40px rgb(242 210 122 / 0.35);
+  }
+
+  .hero__place {
+    margin-top: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: var(--step--1);
+    color: var(--gold-soft);
+  }
+
+  .hero__line {
+    margin-top: 1.25rem;
+    font-size: var(--step-1);
+    line-height: 1.45;
+  }
+
+  .hero .btn-row {
+    margin-top: 2rem;
+  }
+
+  .hero__ghost {
+    color: var(--white);
+  }
+
+  .hero__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 1.5rem;
+    font-size: var(--step--1);
+    color: rgb(255 253 249 / 0.85);
+  }
+
+  .hero__rating :global(svg) {
+    width: 1rem;
+    height: 1rem;
+    color: var(--gold);
+  }
+
+  /* ---------- Poster band ---------- */
+  .poster {
+    padding-block: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+    background:
+      radial-gradient(ellipse at 15% 0%, rgb(255 255 255 / 0.14), transparent 55%),
+      var(--facade);
+  }
+
+  .poster__intro {
+    color: var(--gold-soft);
+  }
+
+  .poster__list {
+    display: grid;
+    gap: 1.1rem 2.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 56rem) {
+    .poster__list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .poster__list li {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .poster__list .sign {
+    font-size: var(--step-3);
+  }
+
+  .poster__red {
+    color: #ff5a4f;
+    text-shadow: 0 0.04em 0 var(--facade-ink);
+  }
+
+  .poster__en {
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(255 253 249 / 0.78);
+  }
+
+  /* ---------- Welcome ---------- */
+  .welcome__grid {
+    display: grid;
+    gap: 3.5rem;
+    align-items: center;
+  }
+
+  @media (min-width: 64rem) {
+    .welcome__grid {
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 5rem;
+    }
+  }
+
+  .welcome__text .h2 {
+    margin-bottom: 1.5rem;
+  }
+
+  .welcome__body {
+    margin-bottom: 2rem;
+    color: var(--ink-soft);
+  }
+
+  .welcome__collage {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(12, minmax(1.6rem, 1fr));
+    min-height: clamp(26rem, 60vw, 38rem);
+  }
+
+  .c1 {
+    grid-column: 1 / 8;
+    grid-row: 1 / 10;
+  }
+
+  .c2 {
+    grid-column: 7 / 13;
+    grid-row: 3 / 13;
+    z-index: 1;
+    border: 6px solid var(--plaster);
+  }
+
+  .c3 {
+    grid-column: 2 / 6;
+    grid-row: 9 / 13;
+    z-index: 2;
+    border: 6px solid var(--plaster);
+  }
+
+  /* ---------- Feature quote ---------- */
+  .feature-quote__grid {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  @media (min-width: 64rem) {
+    .feature-quote__grid {
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 5rem;
+    }
+  }
+
+  .feature-quote__photo {
+    aspect-ratio: 16 / 10;
+    transform: rotate(-1.5deg);
+  }
+
+  /* ---------- Shelves ---------- */
+  .shelves__head {
+    display: grid;
+    gap: 1.25rem 4rem;
+    margin-bottom: 2.75rem;
+  }
+
+  @media (min-width: 64rem) {
+    .shelves__head {
+      grid-template-columns: 1fr 1fr;
+      align-items: end;
+    }
+  }
+
+  .shelves__grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .shelf-card {
+    display: grid;
+    gap: 0.9rem;
+    text-decoration: none;
+  }
+
+  .shelf-card .frame {
+    aspect-ratio: 4 / 5;
+  }
+
+  .shelf-card__label {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 560;
+  }
+
+  .shelf-card__label span {
+    color: var(--berry);
+    transition: transform 0.3s var(--ease-out);
+  }
+
+  .shelf-card:hover .shelf-card__label span {
+    transform: translateX(5px);
+  }
+
+  .shelves__more {
+    margin-top: 2.5rem;
+  }
+
+  /* ---------- Gallery peek ---------- */
+  .peek {
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 90% 10%, rgb(42 167 176 / 0.55), transparent 60%),
+      var(--teal-deep);
+  }
+
+  .peek__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .peek__head .btn {
+    color: var(--white);
+  }
+
+  .peek__track {
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+    padding: 0.5rem max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))) 1.5rem;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold) transparent;
+  }
+
+  .peek__track li {
+    flex: none;
+    width: min(70vw, 22rem);
+    aspect-ratio: 3 / 4;
+    scroll-snap-align: center;
+  }
+
+  .peek__track li:nth-child(even) {
+    margin-top: 2.5rem;
+  }
+
+  /* ---------- Reviews ---------- */
+  .reviews__grid {
+    display: grid;
+    gap: 3rem;
+  }
+
+  @media (min-width: 64rem) {
+    .reviews__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3.5rem;
+    }
+  }
+
+  /* ---------- Visit band ---------- */
+  .visit-band {
+    padding-block: var(--section);
+  }
+
+  .visit-band__grid {
+    display: grid;
+    gap: 3rem;
+  }
+
+  @media (min-width: 64rem) {
+    .visit-band__grid {
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 5rem;
+      align-items: end;
+    }
+  }
+
+  .visit-band__text {
+    margin-top: 1.25rem;
+  }
+
+  .visit-band__addr {
+    margin-top: 1rem;
+    font-style: normal;
+    font-weight: 700;
+    font-size: var(--step-1);
+  }
+
+  .visit-band .btn-row {
+    margin-top: 2rem;
+  }
+
+  .visit-band .btn--ghost {
+    color: var(--white);
+  }
+
+  .visit-band__hours {
+    padding: 1.75rem;
+    border-radius: var(--radius-lg);
+    background: rgb(18 48 79 / 0.45);
+    border: 1px solid rgb(255 255 255 / 0.15);
+  }
+
+  .visit-band__h {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+    font-size: var(--step-1);
+  }
+
+  .visit-band__h :global(svg) {
+    width: 1.3rem;
+    color: var(--gold);
+  }
+</style>

@@ -1,0 +1,410 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Photo from '../../components/Photo.astro';
+import Icon from '../../components/Icon.astro';
+import ReviewQuote from '../../components/ReviewQuote.astro';
+import { business } from '../../data/business';
+import type { PhotoKey } from '../../data/photos';
+import { langFromParam, langPaths, pathFor, ui } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return langPaths();
+}
+
+const lang = langFromParam(Astro.params.lang);
+const t = ui[lang];
+
+const copy = {
+  en: {
+    title: 'Products & Services',
+    description:
+      'Card readings, esoteric and spiritual goods, money transfers, and bus tickets at Botanica & Novedades Luz de Dios in Burlington, NC.',
+    eyebrow: 'Products & Services',
+    heading: 'What the sign promises, and what fills the shelves',
+    lede: 'The shop lists its services right on the window, in Spanish. Here they are, each with a short English line.',
+    servicesTitle: 'From the window sign',
+    shelvesEyebrow: 'On the shelves',
+    shelvesTitle: 'Spiritual goods you can see in the shop',
+    shelvesLede: 'Everything below appears in photos of the shop or in customer reviews.',
+    askTitle: 'Looking for something specific?',
+    askText:
+      "Reviewers say the owners will help you find what you need, even when it isn't on the shelf. Call the shop to ask.",
+  },
+  es: {
+    title: 'Productos y servicios',
+    description:
+      'Lectura de cartas, productos esotéricos, envíos de dinero y boletos de autobús en Botanica & Novedades Luz de Dios, en Burlington, NC.',
+    eyebrow: 'Productos y servicios',
+    heading: 'Lo que dice el letrero y lo que llena los estantes',
+    lede: 'La tienda anuncia sus servicios en su propia ventana. Aquí están, tal como aparecen en el letrero.',
+    servicesTitle: 'Del letrero de la ventana',
+    shelvesEyebrow: 'En los estantes',
+    shelvesTitle: 'Artículos espirituales que se ven en la tienda',
+    shelvesLede: 'Todo lo que aparece abajo se ve en fotos de la tienda o se menciona en reseñas de clientes.',
+    askTitle: '¿Buscas algo en particular?',
+    askText:
+      'Según las reseñas, los dueños te ayudan a encontrar lo que necesitas, aunque no esté en el estante. Llama a la tienda para preguntar.',
+  },
+}[lang];
+
+// The four services, in the shop's own Spanish first.
+const services: {
+  es: string;
+  en: string;
+  body: { en: string; es: string };
+  photo: PhotoKey;
+}[] = [
+  {
+    es: 'Lectura de cartas',
+    en: 'Card readings',
+    body: {
+      en: 'Card readings come first on the shop’s sign. A customer review singles out the excellent attention in the readings.',
+      es: 'La lectura de cartas aparece primero en el letrero de la tienda. Una reseña destaca la atención excelente en las lecturas.',
+    },
+    photo: 'gallery-altar-statues-02',
+  },
+  {
+    es: 'Productos esotéricos',
+    en: 'Spiritual goods, candles, herbs, and oils',
+    body: {
+      en: 'Prepared glass candles, some labeled Botanica y Novedades, herbs in jars, spiritual liquids and oils, saints and statues, rosaries, crosses, and religious art.',
+      es: 'Veladoras preparadas, algunas con la etiqueta Botanica y Novedades, hierbas en frasco, líquidos y aceites espirituales, santos y estatuas, rosarios, cruces y arte religioso.',
+    },
+    photo: 'products-flatlay-herbs-candles-07',
+  },
+  {
+    es: 'Envíos de dinero',
+    en: 'Money transfers',
+    body: {
+      en: 'An everyday service, listed on the same sign. A Viamericas “Envíos de Dinero” sign hangs in the window.',
+      es: 'Un servicio de todos los días, en el mismo letrero. En la ventana hay un letrero de Viamericas de “Envíos de Dinero”.',
+    },
+    photo: 'storefront-current-signage-closeup-04-cropped',
+  },
+  {
+    es: 'Boletos de autobús y más',
+    en: 'Bus tickets and more',
+    body: {
+      en: 'Also on the sign. Call the shop to ask about tickets.',
+      es: 'También aparece en el letrero. Llama a la tienda para preguntar por boletos.',
+    },
+    photo: 'interior-checkout-jewelry-09',
+  },
+];
+
+const shelves: {
+  es: string;
+  en: string;
+  note: { en: string; es: string };
+  photos: [PhotoKey, PhotoKey];
+}[] = [
+  {
+    es: 'Veladoras preparadas',
+    en: 'Prepared candles',
+    note: {
+      en: 'Glass prayer candles in every color, some labeled Botanica y Novedades.',
+      es: 'Veladoras de vidrio de todos colores, algunas con la etiqueta Botanica y Novedades.',
+    },
+    photos: ['products-candles-prepared-01', 'products-prepared-candle-tin-13'],
+  },
+  {
+    es: 'Hierbas',
+    en: 'Herbs',
+    note: {
+      en: 'Herbs and prepared mixes in labeled jars.',
+      es: 'Hierbas y mezclas preparadas en frascos con etiqueta.',
+    },
+    photos: ['products-herb-jars-06', 'products-packets-hanging-09'],
+  },
+  {
+    es: 'Aceites y líquidos espirituales',
+    en: 'Oils and spiritual liquids',
+    note: {
+      en: 'Oils, sprays, baths, and washes, shelved by color.',
+      es: 'Aceites, aerosoles, baños y lociones, acomodados por color.',
+    },
+    photos: ['products-sprays-guadalupe-shelf-25', 'products-bath-washes-11'],
+  },
+  {
+    es: 'Santos y estatuas',
+    en: 'Saints and statues',
+    note: {
+      en: 'Saints, Orisha figures, and statues of every size.',
+      es: 'Santos, figuras de orishas y estatuas de todos tamaños.',
+    },
+    photos: ['products-saint-statues-08', 'products-orisha-statues-14'],
+  },
+  {
+    es: 'Rosarios, cruces y amuletos',
+    en: 'Rosaries, crosses, and amulets',
+    note: {
+      en: 'Hanging rosaries, crosses, beaded strands, and charms.',
+      es: 'Rosarios, cruces, collares de cuentas y amuletos colgados.',
+    },
+    photos: ['products-amulets-hanging-22', 'products-beads-red-black-26'],
+  },
+  {
+    es: 'Arte religioso',
+    en: 'Religious art',
+    note: {
+      en: 'Guadalupe images, prayer cards, and prints throughout the shop.',
+      es: 'Imágenes de la Virgen de Guadalupe, estampas e imágenes por toda la tienda.',
+    },
+    photos: ['gallery-guadalupe-wall-01', 'products-prayer-cards-20'],
+  },
+];
+---
+
+<BaseLayout lang={lang} page="products" title={copy.title} description={copy.description}>
+  <PageHeader
+    lang={lang}
+    eyebrow={copy.eyebrow}
+    title={copy.heading}
+    lede={copy.lede}
+    sign="Productos esotéricos"
+    photo="products-candle-set-23"
+    room="berry"
+  />
+
+  <section class="section room--plaster" aria-labelledby="services-title">
+    <div class="wrap">
+      <h2 id="services-title" class="eyebrow">{copy.servicesTitle}</h2>
+      <ol class="services" role="list">
+        {
+          services.map((s, i) => (
+            <li class="service" data-reveal>
+              <div class="service__text">
+                <span class="service__num" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <h3>
+                  <span class="service__es sign" lang="es">
+                    {s.es}
+                  </span>
+                  {lang === 'en' && <span class="service__en">{s.en}</span>}
+                </h3>
+                <p>{s.body[lang]}</p>
+              </div>
+              <div class="frame service__photo">
+                <Photo photo={s.photo} lang={lang} sizes="(min-width: 64rem) 30vw, 100vw" />
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section room--cream tiles-top" aria-labelledby="shelves-title">
+    <div class="wrap">
+      <div class="shelves-head" data-reveal>
+        <p class="eyebrow">{copy.shelvesEyebrow}</p>
+        <h2 id="shelves-title" class="h2">{copy.shelvesTitle}</h2>
+        <p class="lede">{copy.shelvesLede}</p>
+      </div>
+      <ul class="shelf-grid" role="list">
+        {
+          shelves.map((s, i) => (
+            <li class="shelf" data-reveal style={`--reveal-delay:${(i % 3) * 0.08}s`}>
+              <div class="shelf__photos">
+                <div class="frame">
+                  <Photo photo={s.photos[0]} lang={lang} sizes="(min-width: 64rem) 20vw, (min-width: 40rem) 30vw, 60vw" />
+                </div>
+                <div class="frame">
+                  <Photo photo={s.photos[1]} lang={lang} sizes="(min-width: 64rem) 12vw, (min-width: 40rem) 18vw, 36vw" />
+                </div>
+              </div>
+              <h3 class="shelf__title">
+                <span lang="es">{s.es}</span>
+                {lang === 'en' && <span class="shelf__en">{s.en}</span>}
+              </h3>
+              <p>{s.note[lang]}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section room--red quotes" aria-label={t.googleReview}>
+    <div class="wrap quotes__grid">
+      <ReviewQuote id="sadya" lang={lang} />
+      <ReviewQuote id="jcesar" lang={lang} />
+    </div>
+  </section>
+
+  <section class="section--tight room--plaster ask">
+    <div class="wrap ask__inner" data-reveal>
+      <div>
+        <h2 class="h3">{copy.askTitle}</h2>
+        <p class="lede">{copy.askText}</p>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn--candle" href={business.phoneHref}><Icon name="phone" />{t.callFull}</a>
+        <a class="btn btn--ghost" href={pathFor('visit', lang)}><Icon name="pin" />{t.nav.visit}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .services {
+    display: grid;
+    gap: clamp(3rem, 2rem + 4vw, 6rem);
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .service {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  @media (min-width: 56rem) {
+    .service {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 4rem;
+    }
+    .service:nth-child(even) .service__text {
+      order: 2;
+    }
+  }
+
+  .service__text {
+    position: relative;
+    max-width: 36rem;
+  }
+
+  .service__num {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .service h3 {
+    display: grid;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .service__es {
+    font-size: var(--step-4);
+    color: var(--facade-deep);
+  }
+
+  .service:nth-child(odd) .service__es {
+    color: var(--poster-red);
+  }
+
+  .service__en {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 450;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  .service p {
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .service__photo {
+    aspect-ratio: 4 / 3;
+  }
+
+  /* Shelves */
+  .shelves-head {
+    max-width: 44rem;
+    margin-bottom: 3rem;
+  }
+
+  .shelves-head .h2 {
+    margin-bottom: 1rem;
+  }
+
+  .shelf-grid {
+    display: grid;
+    gap: 3rem 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .shelf__photos {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .shelf__photos .frame {
+    aspect-ratio: 3 / 4;
+  }
+
+  .shelf__photos .frame:last-child {
+    align-self: end;
+    aspect-ratio: 3 / 4.6;
+  }
+
+  .shelf__title {
+    display: grid;
+    gap: 0.15rem;
+    margin-bottom: 0.4rem;
+    font-size: var(--step-1);
+  }
+
+  .shelf__en {
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--berry);
+  }
+
+  .shelf p {
+    color: var(--ink-soft);
+  }
+
+  /* Quotes */
+  .quotes__grid {
+    display: grid;
+    gap: 3.5rem;
+  }
+
+  @media (min-width: 64rem) {
+    .quotes__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+    }
+  }
+
+  /* Ask */
+  .ask__inner {
+    display: grid;
+    gap: 1.5rem 3rem;
+    align-items: center;
+    padding: clamp(1.75rem, 1rem + 3vw, 3rem);
+    border-radius: var(--radius-lg);
+    background: var(--cream);
+    border: 1px solid var(--cream-deep);
+  }
+
+  @media (min-width: 64rem) {
+    .ask__inner {
+      grid-template-columns: 1.4fr auto;
+    }
+  }
+
+  .ask .h3 {
+    margin-bottom: 0.6rem;
+  }
+</style>

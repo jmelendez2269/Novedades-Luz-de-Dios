@@ -1,0 +1,142 @@
+---
+import { business } from '../data/business';
+import { formatTime, ui, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** "full" lists every day and marks today; "compact" groups Monday–Friday. */
+  variant?: 'full' | 'compact';
+  class?: string;
+}
+
+const { lang, variant = 'full', class: className } = Astro.props;
+const t = ui[lang];
+const range = (open: string | null, close: string | null) =>
+  open && close ? `${formatTime(open, lang)} – ${formatTime(close, lang)}` : t.closed;
+
+// Monday first, Sunday last.
+const order = [1, 2, 3, 4, 5, 6, 0];
+const weekday = business.hours[1];
+const saturday = business.hours[6];
+---
+
+{
+  variant === 'compact' ? (
+    <dl class:list={['hours hours--compact', className]}>
+      <div>
+        <dt>{t.weekdays}</dt>
+        <dd>{range(weekday.open, weekday.close)}</dd>
+      </div>
+      <div>
+        <dt>{t.saturday}</dt>
+        <dd>{range(saturday.open, saturday.close)}</dd>
+      </div>
+      <div>
+        <dt>{t.sunday}</dt>
+        <dd>{t.closed}</dd>
+      </div>
+    </dl>
+  ) : (
+    <dl class:list={['hours hours--full', className]} data-hours data-today-label={t.today}>
+      {order.map((d) => {
+        const h = business.hours[d];
+        return (
+          <div data-day={d} class:list={[{ closed: !h.open }]}>
+            <dt>{t.days[d]}</dt>
+            <dd>{range(h.open, h.close)}</dd>
+          </div>
+        );
+      })}
+    </dl>
+  )
+}
+
+<script>
+  // Highlight today's row using the shop's own time zone.
+  const list = document.querySelector<HTMLElement>('[data-hours]');
+  if (list) {
+    const name = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'America/New_York' }).format(new Date());
+    const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(name);
+    const row = list.querySelector<HTMLElement>(`[data-day="${day}"]`);
+    if (row) {
+      row.classList.add('is-today');
+      const dt = row.querySelector('dt');
+      if (dt) {
+        const tag = document.createElement('span');
+        tag.className = 'today-tag';
+        tag.textContent = list.dataset.todayLabel ?? 'Today';
+        dt.append(' ', tag);
+      }
+    }
+  }
+</script>
+
+<style>
+  .hours {
+    display: grid;
+    margin: 0;
+  }
+
+  .hours > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.15rem 1rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px dashed color-mix(in srgb, currentColor 30%, transparent);
+  }
+
+  .hours > div:last-child {
+    border-bottom: 0;
+  }
+
+  dt {
+    font-weight: 700;
+  }
+
+  dd {
+    white-space: nowrap;
+  }
+
+  dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .closed dd {
+    opacity: 0.7;
+  }
+
+  .is-today {
+    position: relative;
+  }
+
+  .is-today::before {
+    content: '';
+    position: absolute;
+    inset: 0 -0.75rem;
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--gold) 22%, transparent);
+    z-index: -1;
+  }
+
+  .hours--full {
+    position: relative;
+    isolation: isolate;
+  }
+
+  :global(.today-tag) {
+    display: inline-block;
+    margin-left: 0.35rem;
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: var(--gold);
+    color: var(--ink);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    vertical-align: 0.15em;
+  }
+</style>

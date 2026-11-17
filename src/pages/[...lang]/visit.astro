@@ -1,0 +1,235 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Photo from '../../components/Photo.astro';
+import Icon from '../../components/Icon.astro';
+import HoursList from '../../components/HoursList.astro';
+import { business } from '../../data/business';
+import { langFromParam, langPaths, ui } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return langPaths();
+}
+
+const lang = langFromParam(Astro.params.lang);
+const t = ui[lang];
+const a = business.address;
+
+const copy = {
+  en: {
+    title: 'Visit & Contact',
+    description:
+      'Visit Botanica & Novedades Luz de Dios at 806 W Webb Ave, Burlington, NC 27217. Open Monday–Friday 10 AM–6:30 PM and Saturday 10 AM–5 PM. Call (336) 314-1821.',
+    eyebrow: 'Visit & Contact',
+    heading: 'Come by West Webb Avenue',
+    lede: 'The quickest way to reach the shop is a phone call.',
+    addressTitle: 'Address',
+    phoneTitle: 'Phone',
+    findTitle: 'How to spot it',
+    find: [
+      'A small stand-alone building painted blue and gray, under a red tile roof and a silver awning.',
+      'House number 806 on the wall.',
+      'The services poster: Lectura de cartas, Productos esotéricos, Envíos de dinero, Boletos de autobús y más.',
+    ],
+    accessTitle: 'Parking',
+    access: 'Wheelchair-accessible parking lot.',
+    mapCta: 'Open in Google Maps',
+  },
+  es: {
+    title: 'Visítanos',
+    description:
+      'Visita Botanica & Novedades Luz de Dios en el 806 W Webb Ave, Burlington, NC 27217. Abierto de lunes a viernes de 10 a. m. a 6:30 p. m. y sábados de 10 a. m. a 5 p. m. Llame al (336) 314-1821.',
+    eyebrow: 'Visítanos / Contacto',
+    heading: 'Pasa por West Webb Avenue',
+    lede: 'La forma más rápida de comunicarte con la tienda es por teléfono.',
+    addressTitle: 'Dirección',
+    phoneTitle: 'Teléfono',
+    findTitle: 'Cómo reconocerla',
+    find: [
+      'Un edificio pequeño e independiente, pintado de azul y gris, con techo de teja roja y un toldo plateado.',
+      'El número 806 en la pared.',
+      'El letrero de servicios: Lectura de cartas, Productos esotéricos, Envíos de dinero, Boletos de autobús y más.',
+    ],
+    accessTitle: 'Estacionamiento',
+    access: 'Estacionamiento con acceso para sillas de ruedas.',
+    mapCta: 'Abrir en Google Maps',
+  },
+}[lang];
+---
+
+<BaseLayout lang={lang} page="visit" title={copy.title} description={copy.description}>
+  <PageHeader
+    lang={lang}
+    eyebrow={copy.eyebrow}
+    title={copy.heading}
+    lede={copy.lede}
+    sign="Visítanos"
+    photo="storefront-current-signage-closeup-04-cropped"
+    room="facade"
+  >
+    <div class="btn-row">
+      <a class="btn btn--candle" href={business.phoneHref}><Icon name="phone" />{t.callFull}</a>
+      <a class="btn btn--ghost visit-ghost" href={business.mapsUrl} target="_blank" rel="noopener">
+        <Icon name="pin" />{t.directions}
+      </a>
+    </div>
+  </PageHeader>
+
+  <section class="section room--plaster">
+    <div class="wrap visit">
+      <div class="card card--hours" data-reveal>
+        <h2 class="card__h"><Icon name="clock" />{t.hoursTitle}</h2>
+        <HoursList lang={lang} />
+      </div>
+
+      <div class="visit__details">
+        <div class="card" data-reveal>
+          <h2 class="card__h"><Icon name="pin" />{copy.addressTitle}</h2>
+          <address class="big">
+            {a.street}<br />
+            {a.city}, {a.region} {a.postalCode}
+          </address>
+          <a class="link-arrow" href={business.mapsUrl} target="_blank" rel="noopener">
+            {copy.mapCta} <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+
+        <div class="card" data-reveal style="--reveal-delay:.08s">
+          <h2 class="card__h"><Icon name="phone" />{copy.phoneTitle}</h2>
+          <p class="big"><a href={business.phoneHref}>{business.phoneDisplay}</a></p>
+        </div>
+
+        <div class="card" data-reveal style="--reveal-delay:.16s">
+          <h2 class="card__h"><Icon name="access" />{copy.accessTitle}</h2>
+          <p>{copy.access}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section room--cream tiles-top spot">
+    <div class="wrap spot__grid">
+      <div class="frame spot__photo" data-reveal>
+        <Photo photo="storefront-current-daylight-02" lang={lang} sizes="(min-width: 64rem) 55vw, 100vw" />
+      </div>
+      <div data-reveal style="--reveal-delay:.1s">
+        <h2 class="h2">{copy.findTitle}</h2>
+        <ol class="spot__list">
+          {copy.find.map((item) => <li>{item}</li>)}
+        </ol>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .visit-ghost {
+    color: var(--white);
+  }
+
+  .visit {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 64rem) {
+    .visit {
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 2rem;
+      align-items: start;
+    }
+  }
+
+  .visit__details {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .card {
+    padding: clamp(1.5rem, 1rem + 2vw, 2.25rem);
+    border-radius: var(--radius-lg);
+    background: var(--white);
+    border: 1px solid var(--cream-deep);
+    box-shadow: var(--shadow);
+  }
+
+  .card--hours {
+    border-top: 6px solid var(--gold);
+  }
+
+  .card__h {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    font-size: var(--step-1);
+  }
+
+  .card__h :global(svg) {
+    width: 1.3rem;
+    color: var(--berry);
+  }
+
+  .big {
+    margin-bottom: 0.9rem;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-style: normal;
+    line-height: 1.2;
+  }
+
+  .big a {
+    text-decoration-color: var(--gold);
+  }
+
+  .spot__grid {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  @media (min-width: 64rem) {
+    .spot__grid {
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 4.5rem;
+    }
+  }
+
+  .spot__photo {
+    aspect-ratio: 4 / 3;
+  }
+
+  .spot__list {
+    display: grid;
+    gap: 1.1rem;
+    margin: 1.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: spot;
+  }
+
+  .spot__list li {
+    position: relative;
+    padding-left: 3rem;
+    font-size: var(--step-1);
+    line-height: 1.45;
+    counter-increment: spot;
+  }
+
+  .spot__list li::before {
+    content: counter(spot);
+    position: absolute;
+    left: 0;
+    top: 0.05em;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--facade);
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+  }
+</style>

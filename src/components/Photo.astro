@@ -1,0 +1,47 @@
+---
+import { Picture } from 'astro:assets';
+import { getPhoto, type PhotoKey } from '../data/photos';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  photo: PhotoKey;
+  lang: Lang;
+  /** The `sizes` attribute: how wide the image renders at each breakpoint. */
+  sizes: string;
+  widths?: number[];
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  /** Set when the image is decorative next to text that already describes it. */
+  decorative?: boolean;
+}
+
+const {
+  photo,
+  lang,
+  sizes,
+  widths = [360, 560, 800, 1100, 1500],
+  class: className,
+  loading = 'lazy',
+  fetchpriority,
+  decorative = false,
+} = Astro.props;
+
+const p = getPhoto(photo);
+const usable = widths.filter((w) => w <= p.src.width);
+if (usable.length === 0) usable.push(p.src.width);
+---
+
+<Picture
+  src={p.src}
+  alt={decorative ? '' : p.alt[lang]}
+  widths={usable}
+  sizes={sizes}
+  formats={['avif', 'webp']}
+  fallbackFormat="jpg"
+  quality={72}
+  loading={loading}
+  decoding="async"
+  fetchpriority={fetchpriority}
+  class={className}
+/>

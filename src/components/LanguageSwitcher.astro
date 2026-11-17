@@ -1,0 +1,68 @@
+---
+import { pathFor, ui, type Lang, type PageId } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  page: PageId;
+  class?: string;
+}
+
+const { lang, page, class: className } = Astro.props;
+const t = ui[lang];
+---
+
+<nav class:list={['lang', className]} aria-label={t.switchLabel}>
+  <a
+    href={pathFor(page, 'en')}
+    hreflang="en"
+    lang="en"
+    aria-current={lang === 'en' ? 'true' : undefined}
+    aria-label={lang === 'en' ? 'English' : 'View in English'}>EN</a
+  >
+  <span aria-hidden="true">/</span>
+  <a
+    href={pathFor(page, 'es')}
+    hreflang="es"
+    lang="es"
+    aria-current={lang === 'es' ? 'true' : undefined}
+    aria-label={lang === 'es' ? 'Español' : 'Ver en español'}>ES</a
+  >
+</nav>
+
+<style>
+  .lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.2rem;
+    border: 1.5px solid currentColor;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+  }
+
+  .lang span {
+    opacity: 0.4;
+  }
+
+  .lang a {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.4rem;
+    min-height: 2rem;
+    padding-inline: 0.4rem;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+
+  .lang a:hover {
+    background: rgb(255 255 255 / 0.15);
+  }
+
+  .lang a[aria-current='true'] {
+    background: var(--white);
+    color: var(--facade-deep);
+  }
+</style>

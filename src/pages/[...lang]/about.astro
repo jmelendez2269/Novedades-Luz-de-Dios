@@ -1,0 +1,325 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Photo from '../../components/Photo.astro';
+import Icon from '../../components/Icon.astro';
+import ReviewQuote from '../../components/ReviewQuote.astro';
+import { langFromParam, langPaths, pathFor } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return langPaths();
+}
+
+const lang = langFromParam(Astro.params.lang);
+
+const copy = {
+  en: {
+    title: 'About',
+    description:
+      'About Botanica & Novedades Luz de Dios, a welcoming neighborhood botanica on West Webb Avenue in Burlington, NC, in the words of its customers.',
+    eyebrow: 'About the shop',
+    heading: 'A neighborhood botanica on West Webb Avenue',
+    lede: 'Warm, colorful, bilingual, and packed from floor to ceiling.',
+    storyTitle: 'Come in with questions',
+    story: [
+      'At 806 West Webb Avenue, Botanica & Novedades Luz de Dios is easy to miss if you only drive by, and hard to forget once you step inside. Shelves are lined with candles and oils, saints watch from the walls, and the room has the kind of quiet that reviewers keep calling a positive, peaceful vibe.',
+      'People come for spiritual merchandise, for a card reading, and for everyday help — including money transfers and bus tickets, which the shop lists right on the window. If you arrive with questions, reviewers say you leave with answers. If something you need is not on the shelf, the owners have a reputation for helping you find it.',
+    ],
+    peopleTitle: 'Gabriel and Mayra',
+    people:
+      'Gabriel and Mayra are named with gratitude in a public review. One Google reply from the shop, translated from Spanish, is enough on its own:',
+    reply: 'We are at your service.',
+    replyNote: 'Reply from the shop on Google, translated from Spanish.',
+    roomsTitle: 'Magenta aisles, a teal entry, a red doorway',
+    rooms:
+      'Inside, the walls change color from room to room. Outside, the shop is a small stand-alone building, painted blue and gray under a red tile roof, with house number 806 on the wall.',
+    welcomeTitle: 'Everyone is welcome',
+    welcomeItems: [
+      'Bilingual: reviews come in Spanish and English, and the sign out front is in Spanish',
+      'Marked LGBTQ+ friendly on Google',
+      'Wheelchair-accessible parking lot',
+    ],
+    cta: 'Plan a visit',
+  },
+  es: {
+    title: 'Nosotros',
+    description:
+      'Conoce Botanica & Novedades Luz de Dios, una botánica de barrio en West Webb Avenue en Burlington, NC, en palabras de sus clientes.',
+    eyebrow: 'La tienda',
+    heading: 'Una botánica de barrio en West Webb Avenue',
+    lede: 'Cálida, llena de color, bilingüe y repleta del piso al techo.',
+    storyTitle: 'Llega con tus preguntas',
+    story: [
+      'En el 806 de West Webb Avenue, Botanica & Novedades Luz de Dios es fácil de pasar por alto si solo vas de paso en carro, y difícil de olvidar una vez que entras. Los estantes están llenos de velas y aceites, los santos te miran desde las paredes, y el lugar tiene esa calma que las reseñas describen una y otra vez como un ambiente positivo y tranquilo.',
+      'La gente viene por artículos espirituales, por una lectura de cartas y por ayuda de todos los días — incluidos envíos de dinero y boletos de autobús, que la tienda anuncia en su propia ventana. Según las reseñas, si llegas con preguntas, sales con respuestas. Y si lo que necesitas no está en el estante, los dueños tienen fama de ayudarte a encontrarlo.',
+    ],
+    peopleTitle: 'Gabriel y Mayra',
+    people:
+      'Gabriel y Mayra aparecen nombrados con gratitud en una reseña pública. Una de las respuestas de la tienda en Google lo resume en pocas palabras: están a su servicio.',
+    reply: '',
+    replyNote: '',
+    roomsTitle: 'Pasillos magenta, una entrada turquesa, una puerta roja',
+    rooms:
+      'Adentro, las paredes cambian de color de un cuarto a otro. Afuera, la tienda es un edificio pequeño e independiente, pintado de azul y gris bajo un techo de teja roja, con el número 806 en la pared.',
+    welcomeTitle: 'Todos son bienvenidos',
+    welcomeItems: [
+      'Bilingüe: las reseñas llegan en español y en inglés, y el letrero de la tienda está en español',
+      'Marcada en Google como amigable con la comunidad LGBTQ+',
+      'Estacionamiento con acceso para sillas de ruedas',
+    ],
+    cta: 'Planea tu visita',
+  },
+}[lang];
+---
+
+<BaseLayout lang={lang} page="about" title={copy.title} description={copy.description}>
+  <PageHeader
+    lang={lang}
+    eyebrow={copy.eyebrow}
+    title={copy.heading}
+    lede={copy.lede}
+    sign="Luz de Dios"
+    photo="interior-aisle-wide-12"
+    room="facade"
+  />
+
+  <!-- Story, with a review set into the text -->
+  <section class="section room--plaster">
+    <div class="wrap story">
+      <div class="story__text" data-reveal>
+        <h2 class="h2">{copy.storyTitle}</h2>
+        <p>{copy.story[0]}</p>
+      </div>
+      <aside class="story__quote">
+        <ReviewQuote id="jcesar" lang={lang} size="md" />
+      </aside>
+      <div class="story__text story__text--2" data-reveal>
+        <p>{copy.story[1]}</p>
+      </div>
+      <div class="frame story__photo" data-reveal>
+        <Photo photo="interior-aisle-statues-03" lang={lang} sizes="(min-width: 64rem) 30vw, 100vw" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Gabriel and Mayra -->
+  <section class="section room--berry tiles-top people">
+    <div class="wrap people__grid">
+      <div data-reveal>
+        <h2 class="h2">{copy.peopleTitle}</h2>
+        <p class="lede people__text">{copy.people}</p>
+        {
+          copy.reply && (
+            <figure class="reply">
+              <blockquote>
+                <p>“{copy.reply}”</p>
+              </blockquote>
+              <figcaption>{copy.replyNote}</figcaption>
+            </figure>
+          )
+        }
+      </div>
+      <ReviewQuote id="yessica" lang={lang} size="md" />
+    </div>
+  </section>
+
+  <!-- The rooms -->
+  <section class="section room--cream rooms">
+    <div class="wrap">
+      <div class="rooms__head" data-reveal>
+        <h2 class="h2">{copy.roomsTitle}</h2>
+        <p class="lede">{copy.rooms}</p>
+      </div>
+      <div class="rooms__strip">
+        <div class="frame swatch" style="--wall: var(--rose)" data-reveal>
+          <Photo photo="interior-aisle-magenta-01" lang={lang} sizes="(min-width: 64rem) 25vw, 50vw" />
+        </div>
+        <div class="frame swatch" style="--wall: var(--teal); --reveal-delay:.08s" data-reveal>
+          <Photo photo="interior-turquoise-rosaries-10" lang={lang} sizes="(min-width: 64rem) 25vw, 50vw" />
+        </div>
+        <div class="frame swatch" style="--wall: var(--red-wall); --reveal-delay:.16s" data-reveal>
+          <Photo photo="interior-doorway-06" lang={lang} sizes="(min-width: 64rem) 25vw, 50vw" />
+        </div>
+        <div class="frame swatch" style="--wall: var(--facade); --reveal-delay:.24s" data-reveal>
+          <Photo photo="storefront-current-signage-closeup-04-cropped" lang={lang} sizes="(min-width: 64rem) 25vw, 50vw" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reviews in Spanish -->
+  <section class="section room--plaster">
+    <div class="wrap duo">
+      <ReviewQuote id="ingrid" lang={lang} />
+      <ReviewQuote id="michael" lang={lang} />
+    </div>
+  </section>
+
+  <!-- Welcome -->
+  <section class="section--tight room--teal">
+    <div class="wrap welcome" data-reveal>
+      <h2 class="h3">{copy.welcomeTitle}</h2>
+      <ul role="list">
+        {copy.welcomeItems.map((item) => <li>{item}</li>)}
+      </ul>
+      <a class="btn btn--candle" href={pathFor('visit', lang)}><Icon name="pin" />{copy.cta}</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .story {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  @media (min-width: 64rem) {
+    .story {
+      grid-template-columns: 1.2fr 0.8fr;
+      grid-template-areas:
+        'text  quote'
+        'text2 photo';
+      gap: 3rem 5rem;
+      align-items: start;
+    }
+    .story__text {
+      grid-area: text;
+    }
+    .story__quote {
+      grid-area: quote;
+      padding-top: 4rem;
+    }
+    .story__text--2 {
+      grid-area: text2;
+    }
+    .story__photo {
+      grid-area: photo;
+    }
+  }
+
+  .story .h2 {
+    margin-bottom: 1.5rem;
+  }
+
+  .story__text p {
+    font-size: var(--step-1);
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+
+  .story__quote {
+    padding-left: 1.5rem;
+    border-left: 3px solid var(--gold);
+  }
+
+  .story__photo {
+    aspect-ratio: 3 / 4;
+    max-height: 30rem;
+  }
+
+  .people__grid {
+    display: grid;
+    gap: 3.5rem;
+    align-items: start;
+  }
+
+  @media (min-width: 64rem) {
+    .people__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+    }
+  }
+
+  .people__text {
+    margin-top: 1.25rem;
+  }
+
+  .reply {
+    margin: 2rem 0 0;
+    padding: 1.5rem 1.75rem;
+    border-radius: var(--radius-lg);
+    background: rgb(0 0 0 / 0.18);
+    border: 1px solid rgb(255 255 255 / 0.18);
+  }
+
+  .reply blockquote {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    font-style: italic;
+    line-height: 1.1;
+    color: var(--gold-soft);
+  }
+
+  .reply figcaption {
+    margin-top: 0.75rem;
+    font-size: var(--step--1);
+    opacity: 0.8;
+  }
+
+  .rooms__head {
+    max-width: 46rem;
+    margin-bottom: 3rem;
+  }
+
+  .rooms__head .h2 {
+    margin-bottom: 1rem;
+  }
+
+  .rooms__strip {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  @media (min-width: 64rem) {
+    .rooms__strip {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .swatch {
+    aspect-ratio: 3 / 4;
+    border-bottom: 10px solid var(--wall);
+  }
+
+  .duo {
+    display: grid;
+    gap: 3.5rem;
+  }
+
+  @media (min-width: 64rem) {
+    .duo {
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+    }
+  }
+
+  .welcome {
+    display: grid;
+    gap: 1.5rem;
+    justify-items: start;
+  }
+
+  .welcome ul {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--step-1);
+  }
+
+  .welcome li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: baseline;
+  }
+
+  .welcome li::before {
+    content: '✦';
+    color: var(--gold);
+    font-size: 0.8em;
+  }
+</style>

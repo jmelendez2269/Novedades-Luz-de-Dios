@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Gallery from '../../components/Gallery.astro';
+import type { PhotoKey } from '../../data/photos';
+import { langFromParam, langPaths } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return langPaths();
+}
+
+const lang = langFromParam(Astro.params.lang);
+
+const copy = {
+  en: {
+    title: 'Gallery',
+    description:
+      'Photos of Botanica & Novedades Luz de Dios in Burlington, NC: the blue storefront, packed aisles, prepared candles, saints, and statues.',
+    eyebrow: 'Gallery',
+    heading: 'Shelves, candles, saints, and color',
+    lede: 'Photos of the shop from its Google listing. Select any photo to see it larger; use the arrow keys to move between photos.',
+  },
+  es: {
+    title: 'Galería',
+    description:
+      'Fotos de Botanica & Novedades Luz de Dios en Burlington, NC: la fachada azul, pasillos llenos, veladoras preparadas, santos y estatuas.',
+    eyebrow: 'Galería',
+    heading: 'Estantes, velas, santos y color',
+    lede: 'Fotos de la tienda de su perfil de Google. Selecciona cualquier foto para verla en grande; usa las flechas del teclado para pasar de una a otra.',
+  },
+}[lang];
+
+// Ordered so neighboring tiles vary in color and subject.
+const photos: PhotoKey[] = [
+  'storefront-current-daylight-02',
+  'interior-aisle-magenta-01',
+  'products-candles-prepared-01',
+  'interior-entry-turquoise-02',
+  'gallery-guadalupe-wall-01',
+  'interior-aisle-wide-12',
+  'products-rainbow-candles-16',
+  'products-saint-statues-08',
+  'interior-doorway-06',
+  'products-herb-jars-06',
+  'interior-mural-04',
+  'products-sprays-guadalupe-shelf-25',
+  'storefront-current-signage-closeup-04-cropped',
+  'interior-checkout-jewelry-09',
+  'products-orisha-statues-14',
+  'gallery-flowers-offerings-06',
+  'interior-turquoise-rosaries-10',
+  'products-candle-closeup-02',
+  'interior-aisle-statues-03',
+  'products-flatlay-herbs-candles-07',
+  'gallery-robed-statue-04',
+  'interior-tapestry-wall-11',
+  'products-amulets-hanging-22',
+  'interior-aisle-clothing-13',
+  'products-prepared-candle-tin-13',
+  'products-owls-shelf-19',
+  'gallery-altar-statues-02',
+  'interior-aisle-tv-05',
+  'products-bath-washes-11',
+  'products-infant-figurine-24',
+  'products-candle-set-23',
+  'interior-aisle-boxes-07',
+  'products-oils-statue-04',
+  'products-amuletos-contra-envidias-18',
+  'products-flowers-statues-display-21',
+  'products-yellow-bottles-10',
+  'gallery-santamuerte-large-03',
+  'products-prayer-cards-20',
+  'products-beads-red-black-26',
+  'products-packets-hanging-09',
+  'products-boxed-figurines-05',
+  'products-gold-crucifix-chain-17',
+  'products-beads-12',
+];
+---
+
+<BaseLayout lang={lang} page="gallery" title={copy.title} description={copy.description}>
+  <PageHeader lang={lang} eyebrow={copy.eyebrow} title={copy.heading} lede={copy.lede} sign="Galería" room="teal" />
+  <section class="section room--plaster gallery-section">
+    <div class="wrap">
+      <Gallery lang={lang} photos={photos} filters />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .gallery-section {
+    padding-top: clamp(2.5rem, 2rem + 2vw, 4rem);
+  }
+</style>

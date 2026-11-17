@@ -1,0 +1,171 @@
+---
+import HoursList from './HoursList.astro';
+import Icon from './Icon.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { business, disclaimer } from '../data/business';
+import { pageOrder, pathFor, ui, type Lang, type PageId } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  page: PageId;
+}
+
+const { lang, page } = Astro.props;
+const t = ui[lang];
+const a = business.address;
+---
+
+<footer class="site-footer tiles-top">
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <p class="footer-mark">
+        <span class="sign sign--red">Botanica y Novedades</span>
+        <span class="footer-name">Luz de Dios</span>
+      </p>
+      <p class="footer-tagline">{t.footerTagline}</p>
+      <a class="btn btn--candle" href={business.phoneHref}>
+        <Icon name="phone" />
+        {t.callFull}
+      </a>
+    </div>
+
+    <div>
+      <h2 class="footer-h">{t.footerVisit}</h2>
+      <address>
+        <a href={business.mapsUrl} rel="noopener" target="_blank">
+          {a.street}<br />
+          {a.city}, {a.region} {a.postalCode}
+        </a>
+      </address>
+      <p class="footer-phone"><a href={business.phoneHref}>{business.phoneDisplay}</a></p>
+    </div>
+
+    <div>
+      <h2 class="footer-h">{t.hoursTitle}</h2>
+      <HoursList lang={lang} variant="compact" />
+    </div>
+
+    <nav aria-label={t.footerNav}>
+      <h2 class="footer-h">{t.footerNav}</h2>
+      <ul role="list">
+        {
+          pageOrder.map((id) => (
+            <li>
+              <a href={pathFor(id, lang)} aria-current={id === page ? 'page' : undefined}>
+                {t.nav[id]}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <LanguageSwitcher lang={lang} page={page} class="footer-lang" />
+    </nav>
+  </div>
+
+  <div class="footer-base">
+    <div class="wrap">
+      <p lang="en">{disclaimer}</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--charcoal);
+    color: var(--white);
+    padding-top: calc(var(--section) * 0.75);
+  }
+
+  .site-footer::before {
+    background: var(--tile-edge-deep);
+  }
+
+  .footer-grid {
+    display: grid;
+    gap: 2.5rem;
+    grid-template-columns: 1fr;
+    padding-bottom: 3rem;
+  }
+
+  @media (min-width: 48rem) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .footer-grid {
+      grid-template-columns: 1.35fr 1fr 1.25fr 0.85fr;
+    }
+  }
+
+  .footer-mark {
+    display: grid;
+    gap: 0.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .footer-mark .sign {
+    font-size: 1.15rem;
+    color: #ff8f86;
+  }
+
+  .footer-name {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-3);
+    line-height: 1;
+    font-variation-settings: 'SOFT' 100;
+  }
+
+  .footer-tagline {
+    max-width: 26rem;
+    margin-bottom: 1.5rem;
+    color: rgb(255 253 249 / 0.8);
+  }
+
+  .footer-h {
+    margin-bottom: 1rem;
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+  }
+
+  address {
+    font-style: normal;
+    line-height: 1.5;
+  }
+
+  .footer-phone {
+    margin-top: 0.75rem;
+    font-weight: 700;
+  }
+
+  ul {
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  ul a {
+    text-decoration: none;
+  }
+
+  ul a:hover,
+  ul a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--gold);
+  }
+
+  .footer-base {
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+    padding-block: 1.25rem;
+    font-size: var(--step--1);
+    color: rgb(255 253 249 / 0.78);
+  }
+</style>

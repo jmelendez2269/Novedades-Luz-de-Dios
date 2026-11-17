@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { pathFor } from '../i18n/ui';
+---
+
+<BaseLayout lang="en" page="home" title="Page not found" description="This page could not be found.">
+  <section class="section room--plaster">
+    <div class="wrap nf">
+      <p class="sign sign--red nf__sign">404</p>
+      <h1 class="h2">This page could not be found.</h1>
+      <p lang="es" class="lede">No encontramos esta página.</p>
+      <div class="btn-row">
+        <a class="btn btn--ink" href={pathFor('home', 'en')}>Home</a>
+        <a class="btn btn--ghost" href={pathFor('home', 'es')} lang="es">Inicio</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+    min-height: 40vh;
+    align-content: center;
+  }
+  .nf__sign {
+    font-size: var(--step-5);
+  }
+</style>

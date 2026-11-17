@@ -1,0 +1,108 @@
+---
+import Photo from './Photo.astro';
+import type { PhotoKey } from '../data/photos';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  eyebrow: string;
+  title: string;
+  /** Short Spanish sign phrase set in poster lettering above the title. */
+  sign?: string;
+  lede?: string;
+  photo?: PhotoKey;
+  room?: 'facade' | 'berry' | 'teal' | 'red';
+}
+
+const { lang, eyebrow, title, sign, lede, photo, room = 'facade' } = Astro.props;
+---
+
+<section class:list={['page-header', `room--${room}`, { 'has-photo': photo }]}>
+  <div class="wrap page-header__grid">
+    <div class="page-header__text">
+      <p class="eyebrow">{eyebrow}</p>
+      {sign && <p class="page-header__sign sign sign--outline" lang="es" aria-hidden="true">{sign}</p>}
+      <h1 class="display">{title}</h1>
+      {lede && <p class="lede">{lede}</p>}
+      <slot />
+    </div>
+    {
+      photo && (
+        <div class="page-header__photo frame">
+          <Photo
+            photo={photo}
+            lang={lang}
+            sizes="(min-width: 64rem) 40vw, 100vw"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .page-header {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(3rem, 2rem + 5vw, 6.5rem);
+  }
+
+  /* Soft light falling across the wall, like a lamp in the shop. */
+  .page-header::after {
+    content: '';
+    position: absolute;
+    inset: -30% -10% auto auto;
+    width: 60vmax;
+    height: 60vmax;
+    background: radial-gradient(circle, rgb(242 210 122 / 0.22), transparent 62%);
+    pointer-events: none;
+  }
+
+  .page-header__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+  }
+
+  @media (min-width: 64rem) {
+    .has-photo .page-header__grid {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 4rem;
+    }
+  }
+
+  .page-header__text {
+    max-width: 44rem;
+  }
+
+  .page-header__sign {
+    margin-bottom: 0.6rem;
+    font-size: var(--step-2);
+  }
+
+  h1 {
+    margin-bottom: 1.25rem;
+  }
+
+  .page-header__photo {
+    aspect-ratio: 4 / 5;
+    max-height: 34rem;
+    transform: rotate(1.2deg);
+    box-shadow: var(--shadow-lg);
+  }
+
+  @media (max-width: 63.99rem) {
+    .page-header__photo {
+      aspect-ratio: 16 / 10;
+      transform: none;
+    }
+  }
+
+  .page-header :global(.btn-row) {
+    margin-top: 2rem;
+  }
+</style>
